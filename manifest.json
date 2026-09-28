@@ -1,0 +1,9 @@
+{
+  "name": "The Crownline Residences",
+  "short_name": "Crownline",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFFF0",
+  "theme_color": "#7A2233",
+  "icons": []
+}
