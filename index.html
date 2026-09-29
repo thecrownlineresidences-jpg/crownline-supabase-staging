@@ -1245,8 +1245,8 @@ class Component extends DCLogic {
         "Restock towels, toiletries and amenities before the guest arrives.",
       ],
       taskInput:"", teamInput:"",
-      aiInput:"", aiLoading:false,
-      aiMessages:[{role:"ai",text:"Hello Primus. I can see your whole portfolio. Ask me anything — revenue, occupancy, which property needs attention, or what to do next."}],
+      aiInput:"", aiLoading:false, aiHistory:[],
+      aiMessages:[{role:"ai",text:"Hello Primus. I can see your whole portfolio and I can update it directly — log an expense, add a booking, mark a property cleaned, whatever you tell me to do."}],
       data:null,
     };
   }
@@ -2101,11 +2101,20 @@ class Component extends DCLogic {
     const q=this.state.aiInput.trim(); if(!q||this.state.aiLoading) return;
     this.setState(s=>({aiMessages:s.aiMessages.concat([{role:"user",text:q}]),aiInput:"",aiLoading:true}));
     try{
-      const prompt="You are Crownline AI, the analyst inside a hospitality management dashboard for host 'Primus'. Use ONLY this live data and answer concisely (currency in ₹ Indian format). "+this.portfolioContext()+"\n\nQuestion: "+q+"\n\nGive a short, direct, useful answer (2-4 sentences).";
-      const r=await window.claude.complete(prompt);
-      this.setState(s=>({aiMessages:s.aiMessages.concat([{role:"ai",text:(r||"").trim()||"I couldn't generate a response."}]),aiLoading:false}));
+      const { data:sessionData } = await sb.auth.getSession();
+      const token = sessionData && sessionData.session && sessionData.session.access_token;
+      if(!token) throw new Error("You need to be signed in for the AI Assistant to work.");
+      const res = await fetch(SUPABASE_URL+"/functions/v1/ai-assistant", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+token, "apikey":SUPABASE_ANON_KEY },
+        body: JSON.stringify({ message:q, history:this.state.aiHistory||[] })
+      });
+      const j = await res.json();
+      if(!res.ok || j.error) throw new Error(j.error||"AI request failed");
+      this.setState(s=>({aiMessages:s.aiMessages.concat([{role:"ai",text:(j.reply||"").trim()||"Done."}]),aiLoading:false,aiHistory:j.history||s.aiHistory}));
+      if(j.actions && j.actions.length){ this.loadAll(); }
     }catch(e){
-      this.setState(s=>({aiMessages:s.aiMessages.concat([{role:"ai",text:"I'm having trouble reaching the model right now. Based on your data, occupancy is strong across the portfolio; the weakest property is worth a pricing review."}]),aiLoading:false}));
+      this.setState(s=>({aiMessages:s.aiMessages.concat([{role:"ai",text:"I couldn't reach the assistant right now ("+(e.message||e)+"). Try again in a moment."}]),aiLoading:false}));
     }
   }
 
