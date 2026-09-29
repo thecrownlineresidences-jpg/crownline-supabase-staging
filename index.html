@@ -1272,7 +1272,11 @@ class Component extends DCLogic {
         grad_colors: Array.isArray(r.grad)?r.grad:[], occupancy_pct:Number(r.occ)||0,
         revenue:Number(r.rev)||0, rating:Number(r.rating)||0, nightly_price:Number(r.price)||0,
         clean_status:r.clean||'not done', maint_status:r.maint||'clear', guest_note:r.guest||null,
-        owner_id: r.ownerId||null
+        owner_id: r.ownerId||null,
+        ical_import_urls: [
+          r.airbnbImportUrl ? {platform:'Airbnb', url:r.airbnbImportUrl} : null,
+          r.agodaImportUrl ? {platform:'Agoda', url:r.agodaImportUrl} : null
+        ].filter(Boolean)
       })},
       automations: { table:'automations', pk:'id', toDb:(r)=>({
         id:r.id, name:r.name||'', trigger_desc:r.trigger||null, action_desc:r.action||null, enabled:!!r.enabled
@@ -1341,7 +1345,10 @@ class Component extends DCLogic {
           photos:p.photos||[], agreement:p.agreement_url||'', grad:(p.grad_colors&&p.grad_colors.length)?p.grad_colors:["#7a2233","#3a1018"],
           occ:Number(p.occupancy_pct)||0, rev:Number(p.revenue)||0, rating:Number(p.rating)||0, price:Number(p.nightly_price)||0,
           clean:p.clean_status||'not done', maint:p.maint_status||'clear', guest:p.guest_note||'',
-          owned: p.owner_id!=null, ownerId: p.owner_id
+          owned: p.owner_id!=null, ownerId: p.owner_id,
+          icalToken: p.ical_token||'',
+          airbnbImportUrl: (Array.isArray(p.ical_import_urls)?p.ical_import_urls:[]).find(x=>x&&x.platform==='Airbnb')?.url || '',
+          agodaImportUrl: (Array.isArray(p.ical_import_urls)?p.ical_import_urls:[]).find(x=>x&&x.platform==='Agoda')?.url || ''
         })),
         bookings: (bookR.data||[]).map(b=>({
           id:b.booking_number, guest:b.guest_name||'', phone:b.guest_phone||'', guests:b.guests_count||1,
@@ -1651,8 +1658,8 @@ class Component extends DCLogic {
     const propChoicesAll=["All"].concat(this.propList().map(p=>p.name+this.propTag(p.name)));
     return {
       Properties:{ key:"properties", eyebrow:"Portfolio", add:"Add Property",
-        columns:[{k:"name",l:"Property"},{k:"building",l:"Building"},{k:"loc",l:"Address"},{k:"photos",l:"Photos",fmt:"photocount"},{k:"agreement",l:"Agreement",fmt:"filechip"}],
-        fields:[{k:"name",l:"Property name",t:"text"},{k:"building",l:"Building name",t:"text"},{k:"loc",l:"Property address",area:true},{k:"photos",l:"Property photos",file:true,image:true,multiple:true},{k:"agreement",l:"Rent agreement",file:true}] },
+        columns:[{k:"name",l:"Property"},{k:"building",l:"Building"},{k:"loc",l:"Address"},{k:"photos",l:"Photos",fmt:"photocount"},{k:"agreement",l:"Agreement",fmt:"filechip"},{k:"sync",l:"Calendar Sync",action:"icalCopy"}],
+        fields:[{k:"name",l:"Property name",t:"text"},{k:"building",l:"Building name",t:"text"},{k:"loc",l:"Property address",area:true},{k:"photos",l:"Property photos",file:true,image:true,multiple:true},{k:"agreement",l:"Rent agreement",file:true},{k:"airbnbImportUrl",l:"Airbnb calendar link (paste from Airbnb > Calendar > Availability > Connect calendars > Export)",t:"text"},{k:"agodaImportUrl",l:"Agoda calendar link (paste from Agoda extranet > Calendar sync > Export)",t:"text"}] },
       OwnerProperty:{ key:"properties", eyebrow:"Owner-Managed", add:"Owner Property",
         columns:[{k:"name",l:"Property"},{k:"building",l:"Building"},{k:"loc",l:"Address"},{k:"photos",l:"Photos",fmt:"photocount"},{k:"agreement",l:"Agreement",fmt:"filechip"}],
         fields:[{k:"owner",l:"Owner",sel:ownerNames.length?ownerNames:["— add an owner first —"]},{k:"name",l:"Property name",t:"text"},{k:"building",l:"Building name",t:"text"},{k:"loc",l:"Property address",area:true},{k:"share",l:"Our profit share (%)",t:"number"},{k:"photos",l:"Property photos",file:true,image:true,multiple:true},{k:"agreement",l:"Rent agreement",file:true}] },
@@ -2037,6 +2044,12 @@ class Component extends DCLogic {
     const url="https://wa.me/"+phone+"?text="+encodeURIComponent(this.buildMaidMessage(r));
     try{ window.open(url,"_blank"); this.flash("Opening WhatsApp to "+(r.maid||"maid")+"…"); }catch(e){ this.flash("Could not open WhatsApp."); }
   }; }
+  copyIcalLink(r){ return ()=>{
+    if(!r.icalToken){ this.flash("Sync link not ready yet — try refreshing."); return; }
+    const url="https://kvrodrohfadbeovdljlt.supabase.co/functions/v1/ical-export/"+r.icalToken+".ics";
+    try{ navigator.clipboard.writeText(url); this.flash("Sync link copied — paste this into Airbnb/Agoda's calendar import."); }
+    catch(e){ this.flash(url); }
+  }; }
   closeGuestMsg(){ this.setState({guestMsg:null}); }
   copyGuestMsg(){ const t=this.state.guestMsg&&this.state.guestMsg.text; if(!t) return; try{ navigator.clipboard.writeText(t); this.flash("Message copied."); }catch(e){ this.flash("Copy not available."); } }
 
@@ -2389,6 +2402,7 @@ class Component extends DCLogic {
           if((route==="Booking"&&c.k==="prop")) text=(text||"")+this.propTag(val); else if(route==="Properties"&&c.k==="name") text=(text||"")+this.propTag(val);
           if(c.action==="message"){ return {text:"View message",hasClick:true,plain:false,click:this.showGuestMessage(r),style:this.pill("gold")+";cursor:pointer;border:none;font-family:inherit"}; }
           if(c.action==="whatsapp"){ return {text:"WhatsApp",hasClick:true,plain:false,click:this.notifyMaid(r),style:"display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(37,211,102,.15);color:#128C4B;cursor:pointer;border:none;font-family:inherit"}; }
+          if(c.action==="icalCopy"){ return {text:"Copy Sync Link",hasClick:true,plain:false,click:this.copyIcalLink(r),style:this.pill("gold")+";cursor:pointer;border:none;font-family:inherit"}; }
           const st= c.pill? this.pill(this.toneFor(route,c.k,val))+";" : "color:"+(["name","issue","item","guest","task"].indexOf(c.k)>=0?"#2b2320":"#6b615a");
           return {text, style:st, hasClick:false, plain:true};
         })
