@@ -753,6 +753,28 @@
             </div>
           </sc-if>
 
+          <sc-if value="{{ ownerSettleShow }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+              <h2 style="font-family:'Alice',serif;font-weight:500;font-size:19px;margin:0">Owner Settlements</h2>
+              <button onClick="{{ addOwnerPayout }}" style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#FFFDF6;background:#7a2233;border:none;padding:9px 14px;border-radius:10px;cursor:pointer"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg>Record Payout</button>
+            </div>
+            <p style="font-size:12.5px;color:#9a9082;margin:0 0 14px">Booking income − expenses = net profit, split in each property's agreed ratio. Payouts you record below are deducted from the owner's share — they are never counted as expenses. The owner sees this same statement in their portal.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+              <sc-for list="{{ ownerSettleKpis }}" as="k" hint-placeholder-count="4"><div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:13px;padding:14px;border-left:3px solid {{ k.color }}"><div style="font-size:12px;color:#9a9082;margin-bottom:5px">{{ k.label }}</div><div style="font-family:'Alice',serif;font-size:20px;color:{{ k.color }}">{{ k.value }}</div></div></sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:18px">
+              <sc-for list="{{ ownerSettleAdmin }}" as="r" hint-placeholder-count="1"><div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:16px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-family:'Alice',serif;font-size:16px;color:#2b2320">{{ r.name }}</span><span style="font-size:11px;color:#9a9082">{{ r.owner }}</span></div><sc-for list="{{ r.lines }}" as="l" hint-placeholder-count="7"><div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid #F1ECDD"><span style="color:#6b615a">{{ l.label }}</span><span style="color:{{ l.color }};font-weight:600">{{ l.value }}</span></div></sc-for><sc-if value="{{ r.noProfit }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#9a9082;margin-top:8px">No profit to share yet — expenses are higher than income.</div></sc-if></div></sc-for>
+            </div>
+            <div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:16px;overflow:hidden;margin-bottom:28px">
+              <div style="padding:14px 18px;border-bottom:1px solid #E7E0D0;font-family:'Alice',serif;font-size:16px">Payouts to owners</div>
+              <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead><tr><th style="text-align:left;padding:11px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Date</th><th style="text-align:left;padding:11px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Property</th><th style="text-align:left;padding:11px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Note</th><th style="text-align:left;padding:11px 18px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Amount</th><th style="border-bottom:1px solid #E7E0D0"></th></tr></thead>
+                <tbody><sc-for list="{{ ownerPayoutAdminRows }}" as="x" hint-placeholder-count="0"><tr style="border-bottom:1px solid #EDE7D8"><td style="padding:12px 18px;color:#6b615a">{{ x.date }}</td><td style="padding:12px 18px;color:#2b2320">{{ x.prop }}</td><td style="padding:12px 18px;color:#6b615a">{{ x.note }}</td><td style="padding:12px 18px;color:#4FA478;font-weight:600">{{ x.amt }}</td><td style="padding:12px 18px;text-align:right"><button onClick="{{ x.edit }}" style="background:none;border:none;color:#9a9082;cursor:pointer;padding:3px">✎</button><button onClick="{{ x.remove }}" style="background:none;border:none;color:#C25B52;cursor:pointer;padding:3px">×</button></td></tr></sc-for></tbody>
+              </table></div>
+              <sc-if value="{{ ownerPayoutAdminEmpty }}" hint-placeholder-val="{{ true }}"><div style="padding:26px;text-align:center;color:#9a9082;font-size:13px">No payouts recorded yet. Click <strong style="color:#7a2233">Record Payout</strong> when you pay an owner their share.</div></sc-if>
+            </div>
+          </sc-if>
+
           <h2 style="font-family:'Alice',serif;font-weight:500;font-size:19px;margin:0 0 14px">Owners</h2>
           <sc-if value="{{ ownersEmpty }}" hint-placeholder-val="{{ true }}"><div style="background:#FFFDF6;border:1px dashed #D9D0BC;border-radius:16px;padding:40px;text-align:center;color:#9a9082;font-size:13.5px;margin-bottom:24px">No owners yet. Click <strong style="color:#7a2233">Add New Owner</strong> to onboard one.</div></sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px">
@@ -1066,10 +1088,20 @@
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px">
             <sc-for list="{{ ownerEarnKpis }}" as="k" hint-placeholder-count="4"><div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:14px;padding:16px;border-top:3px solid {{ k.color }}"><div style="font-size:11.5px;color:#9a9082;margin-bottom:6px">{{ k.label }}</div><div style="font-family:'Alice',serif;font-size:22px;color:{{ k.color }}">{{ k.value }}</div><div style="font-size:11px;color:#9a9082;margin-top:3px">{{ k.sub }}</div></div></sc-for>
           </div>
-          <div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:16px;padding:20px">
-            <h2 style="font-family:'Alice',serif;font-weight:500;font-size:17px;margin:0 0 4px">Profit Split</h2>
-            <p style="font-size:12px;color:#9a9082;margin:0 0 12px">How your net profit is shared with Crownline.</p>
-            <sc-for list="{{ ownerEarnRows }}" as="r" hint-placeholder-count="1"><div style="border:1px solid #EDE7D8;border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:13.5px;color:#2b2320;font-weight:600">{{ r.name }}</span><span style="font-size:11.5px;color:#9a9082">Net {{ r.net }}</span></div><div style="height:8px;border-radius:8px;overflow:hidden;background:#EDE7D8;display:flex"><div style="height:100%;width:{{ r.ownPct }}%;background:#4FA478"></div><div style="height:100%;width:{{ r.ourPct }}%;background:#7a2233"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11.5px"><span style="color:#4FA478">You keep {{ r.own }}</span><span style="color:#7a2233">Crownline {{ r.our }}</span></div></div></sc-for>
+          <div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:16px;padding:20px;margin-bottom:16px">
+            <h2 style="font-family:'Alice',serif;font-weight:500;font-size:17px;margin:0 0 4px">Settlement Statement</h2>
+            <p style="font-size:12px;color:#9a9082;margin:0 0 14px">Booking income, less expenses, shared in the agreed ratio — and what has been paid to you.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px">
+              <sc-for list="{{ ownerSettleRows }}" as="r" hint-placeholder-count="1"><div style="border:1px solid #EDE7D8;border-radius:12px;padding:14px"><div style="font-family:'Alice',serif;font-size:15px;color:#2b2320;margin-bottom:8px">{{ r.name }}</div><sc-for list="{{ r.lines }}" as="l" hint-placeholder-count="7"><div style="display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid #F1ECDD"><span style="color:#6b615a">{{ l.label }}</span><span style="color:{{ l.color }};font-weight:600">{{ l.value }}</span></div></sc-for><sc-if value="{{ r.noProfit }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#9a9082;margin-top:8px">No profit to share yet — expenses are higher than income.</div></sc-if></div></sc-for>
+            </div>
+          </div>
+          <div style="background:#FFFDF6;border:1px solid #E7E0D0;border-radius:16px;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid #E7E0D0"><h2 style="font-family:'Alice',serif;font-weight:500;font-size:17px;margin:0">Payments Received</h2></div>
+            <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr><th style="text-align:left;padding:11px 20px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Date</th><th style="text-align:left;padding:11px 20px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Property</th><th style="text-align:left;padding:11px 20px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Note</th><th style="text-align:left;padding:11px 20px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#9a9082;font-weight:500;border-bottom:1px solid #E7E0D0">Amount</th></tr></thead>
+              <tbody><sc-for list="{{ ownerPayoutRows }}" as="x" hint-placeholder-count="0"><tr style="border-bottom:1px solid #EDE7D8"><td style="padding:12px 20px;color:#6b615a">{{ x.date }}</td><td style="padding:12px 20px;color:#2b2320">{{ x.prop }}</td><td style="padding:12px 20px;color:#6b615a">{{ x.note }}</td><td style="padding:12px 20px;color:#4FA478;font-weight:600">{{ x.amt }}</td></tr></sc-for></tbody>
+            </table></div>
+            <sc-if value="{{ ownerNoPayouts }}" hint-placeholder-val="{{ true }}"><div style="padding:30px;text-align:center;color:#9a9082;font-size:13px">No payouts recorded yet.</div></sc-if>
           </div>
         </sc-if>
 
@@ -1303,9 +1335,18 @@ class Component extends DCLogic {
       expenses: { table:'expenses', pk:'id', toDb:(r)=>({
         id:r.id, expense_date:r.date||new Date().toISOString().slice(0,10), category:r.category||'Other',
         property_id:this.propIdByName()[r.prop]||null, note:r.note||null, amount:Number(r.amt)||0
+      })},
+      // Owner payouts (profit-share paid to a property owner) live in the same
+      // `expenses` table but are kept OUT of expense totals — see loadAll().
+      payouts: { table:'expenses', pk:'id', toDb:(r)=>Object.assign(Number(r.id)>0?{id:r.id}:{},{
+        expense_date:r.date||new Date().toISOString().slice(0,10), category:'Owner Payout',
+        property_id:this.propIdByName()[r.prop]||null, note:r.note||null, amount:Number(r.amt)||0
       })}
     };
   }
+  // A payout = money we paid the owner out of the shared profit. It is NOT an
+  // expense of the property, so it must never reduce net profit.
+  isPayoutRow(category,note){ return /payout|profit\s*share|owner\s*share/i.test(String(category||"")+" "+String(note||"")); }
   propIdByName(){
     const map={}; ((this.state&&this.state.data&&this.state.data.properties)||[]).forEach(p=>{ map[p.name]=p.id; });
     return map;
@@ -1338,6 +1379,7 @@ class Component extends DCLogic {
       const bad = [propsR,bookR,hkR,expR,ownR,assocR,autoR].find(r=>r.error);
       if(bad) throw bad.error;
       const propNameById={}; (propsR.data||[]).forEach(p=>{ propNameById[p.id]=p.name; });
+      const ownedPropIds={}; (propsR.data||[]).forEach(p=>{ if(p.owner_id!=null) ownedPropIds[p.id]=true; });
       const prevData = (this.state && this.state.data) || {};
       const data = {
         properties: (propsR.data||[]).map(p=>({
@@ -1361,8 +1403,12 @@ class Component extends DCLogic {
           salary:h.salary_status||'', contact:h.contact||'', cleaning:h.cleaning_status||'not done',
           laundryGiven:h.laundry_given||'', laundryDelivered:h.laundry_delivered||'', laundryAmt:Number(h.laundry_amt)||0
         })),
-        expenses: (expR.data||[]).map(e=>({
+        expenses: (expR.data||[]).filter(e=>!(ownedPropIds[e.property_id]&&this.isPayoutRow(e.category,e.note))).map(e=>({
           id:e.id, date:e.expense_date||'', category:e.category||'', prop:propNameById[e.property_id]||'',
+          note:e.note||'', amt:Number(e.amount)||0
+        })),
+        payouts: (expR.data||[]).filter(e=>ownedPropIds[e.property_id]&&this.isPayoutRow(e.category,e.note)).map(e=>({
+          id:e.id, date:e.expense_date||'', category:'Owner Payout', prop:propNameById[e.property_id]||'',
           note:e.note||'', amt:Number(e.amount)||0
         })),
         owners: (ownR.data||[]).map(o=>({ id:o.id, ownerName:o.owner_name||'', phone:o.phone||'', email:o.email||'', access:o.access||{}, _profileId:o.profile_id })),
@@ -1690,6 +1736,8 @@ class Component extends DCLogic {
         fields:[{k:"name",l:"Associate full name"},{k:"phone",l:"Contact number",t:"tel"},{k:"email",l:"Email address (used for login)",t:"email"},{k:"pass",l:"Password (used for login)",t:"password"},{k:"access",l:"Dashboard access — choose which sections this associate can use",toggles:["Dashboard","Properties","Booking","Calendar","Expenses","Analytics","Documents","Housekeeping","Automation","AI Assistant"]}] },
       OwnerBooking:{ key:"ownerBookings", eyebrow:"Bookings", add:"Owner Booking",
         fields:[{k:"guest",l:"Guest name"},{k:"prop",l:"Property",sel:ownerProps},{k:"plat",l:"Booking source",sel:["Airbnb","Booking.com","MakeMyTrip","Agoda","Direct"]},{k:"checkin",l:"Check-in",t:"date"},{k:"checkout",l:"Check-out",t:"date"},{k:"amt",l:"Amount (₹)",t:"number"}] },
+      OwnerPayout:{ key:"payouts", eyebrow:"Settlement", add:"Owner Payout",
+        fields:[{k:"date",l:"Payout date",t:"date"},{k:"prop",l:"Property",sel:ownedPropChoices.length?ownedPropChoices:["— add an owner property first —"],store:"prop"},{k:"amt",l:"Amount paid to owner (₹)",t:"number"},{k:"note",l:"Note (e.g. Sept profit share, UPI ref)"}] },
       OwnerExpense:{ key:"ownerExpenses", eyebrow:"Ledger", add:"Owner Expense",
         fields:[{k:"date",l:"Date",t:"date"},{k:"category",l:"Category",sel:["Rent","Deposit","Electricity","Furlenco","Housekeeping","Furniture","Inventory","Maintenance","Other expenses"]},{k:"prop",l:"Property",sel:ownedPropChoices.length?ownedPropChoices:["— add an owner property first —"],store:"prop"},{k:"note",l:"Note"},{k:"amt",l:"Amount (₹)",t:"number"}] },
       "Team Access":{ key:"team", eyebrow:"Team", add:"Add Member",
@@ -1711,7 +1759,7 @@ class Component extends DCLogic {
   printPage(){ window.print(); }
 
   openAddFor(module){ const cfg=this.moduleConfig()[module]; const form={}; (cfg.fields||[]).forEach(f=>form[f.k]= f.t==="number"?0:(f.sel?f.sel[0]:"")); this.setState({modal:{module,id:null},form}); }
-  openEdit(module,id){ return ()=>{ const cfg=this.moduleConfig()[module]; const rec=(this.state.data[cfg.key]||[]).find(r=>String(r.id)===String(id)); const form=Object.assign({},rec); if((module==="OwnerExpense"||module==="Booking"||module==="Expenses")&&form.prop) form.prop=form.prop+this.propTag(form.prop); this.setState({modal:{module,id},form}); }; }
+  openEdit(module,id){ return ()=>{ const cfg=this.moduleConfig()[module]; const rec=(this.state.data[cfg.key]||[]).find(r=>String(r.id)===String(id)); const form=Object.assign({},rec); if((module==="OwnerExpense"||module==="OwnerPayout"||module==="Booking"||module==="Expenses")&&form.prop) form.prop=form.prop+this.propTag(form.prop); this.setState({modal:{module,id},form}); }; }
   removeRec(module,id){ return async ()=>{
     const cfg=this.moduleConfig()[module];
     if(module==="Owners"||module==="Associates"){
@@ -1763,7 +1811,7 @@ class Component extends DCLogic {
   async saveModal(){
     const {module,id}=this.state.modal; const cfg=this.moduleConfig()[module]; const form=Object.assign({},this.state.form);
     (cfg.fields||[]).forEach(f=>{ if(f.t==="number") form[f.k]=Number(form[f.k])||0; });
-    if((module==="OwnerExpense"||module==="Booking"||module==="Expenses")&&form.prop) form.prop=String(form.prop).replace(/\s*\([^)]*OWNER\)\s*$/,"");
+    if((module==="OwnerExpense"||module==="OwnerPayout"||module==="Booking"||module==="Expenses")&&form.prop) form.prop=String(form.prop).replace(/\s*\([^)]*OWNER\)\s*$/,"");
 
     // Owners/Associates carry a REAL Supabase Auth login now, so creating or
     // changing their password goes through the admin-manage-user Edge
@@ -1813,7 +1861,7 @@ class Component extends DCLogic {
       // CREATE — id assignment + per-module defaults happen in assignId, then saveRecord() writes
       this.saveRecord(cfg.key, form, (arr)=>{
         let nid=1; arr.forEach(r=>{ const n=typeof r.id==="number"?r.id:0; if(n>=nid)nid=n+1; });
-        if(module==="Booking") form.id="B-"+(2292+arr.length); else form.id=nid;
+        if(module==="Booking") form.id="B-"+(2292+arr.length); else if(module==="OwnerPayout") form.id=-Date.now(); else form.id=nid;
         if(module==="Properties"||module==="OwnerProperty"){ if(!form.grad) form.grad=["#7a2233","#3a1018"]; ["occ","rev","rating","price"].forEach(k=>{ if(form[k]==null) form[k]=0; }); if(!form.clean) form.clean="not done"; if(!form.maint) form.maint="clear"; if(form.guest==null) form.guest=""; if(module==="OwnerProperty"){ const own=(this.state.data.owners||[]).find(o=>o.ownerName===form.owner); form.owned=true; form.ownerId=own?own.id:null; form.share=Number(form.share)||0; delete form.owner; } }
         if(module==="Automation"&&form.enabled==null) form.enabled=true;
       });
@@ -1879,19 +1927,31 @@ class Component extends DCLogic {
     return "Hello "+name+", this is The Crownline Residences.\n\nCleaning is "+when+" for:\n• Property: "+(r.prop||"—")+"\n• Time: "+(this.fmt12(r.time)||r.time||"to be confirmed")+"\n\nPlease ensure a full turnover — bedrooms, bathrooms, kitchen, fresh linen & towels, and restock amenities. Reply DONE once completed.\n\nThank you!";
   }
   /* ---------- owner-managed properties ---------- */
-  ownerFinancials(){
-    const d=this.state.data; const oprops=((d&&d.properties)||[]).filter(p=>p.owned);
-    const perProp={}; const list=[]; let tIncome=0,tExpense=0,tNet=0,tOur=0,tOwner=0;
+  // Settlement maths per owner property:
+  //   Net profit  = booking income − expenses (owner payouts are NOT expenses)
+  //   Our share   = Net × our%        Owner share = Net − Our share
+  //   Balance due = Owner share − payouts already paid to the owner
+  // No profit (net ≤ 0) → nothing to distribute. `inPeriod(dateStr)` optionally
+  // restricts bookings (by check-in), expenses and payouts to one month.
+  ownerFinancials(inPeriod, onlyProps){
+    const d=this.state.data; let oprops=((d&&d.properties)||[]).filter(p=>p.owned);
+    if(onlyProps){ const set={}; onlyProps.forEach(n=>set[n]=true); oprops=oprops.filter(p=>set[p.name]); }
+    const inP=(ds)=>!inPeriod||inPeriod(ds);
+    const sum=(arr)=>arr.reduce((a,b)=>a+(Number(b.amt)||0),0);
+    const perProp={}; const list=[]; let tIncome=0,tExpense=0,tNet=0,tOur=0,tOwner=0,tPaid=0,tDue=0;
     oprops.forEach(p=>{
-      const income=(d.bookings||[]).filter(b=>b.prop===p.name).reduce((a,b)=>a+(Number(b.amt)||0),0);
-      const expense=(d.ownerExpenses||[]).filter(x=>x.prop===p.name).reduce((a,b)=>a+(Number(b.amt)||0),0)+(d.expenses||[]).filter(x=>x.prop===p.name).reduce((a,b)=>a+(Number(b.amt)||0),0);
-      const net=income-expense; const share=Number(p.share)||0; const our=Math.round(net*share/100); const own=net-our;
+      const income=sum((d.bookings||[]).filter(b=>b.prop===p.name&&b.status!=="cancelled"&&inP(b.checkin)));
+      const expense=sum((d.ownerExpenses||[]).filter(x=>x.prop===p.name&&inP(x.date)))+sum((d.expenses||[]).filter(x=>x.prop===p.name&&inP(x.date)));
+      const payoutList=(d.payouts||[]).filter(x=>x.prop===p.name&&inP(x.date));
+      const paid=sum(payoutList);
+      const net=income-expense; const share=Number(p.share)||0; const dist=Math.max(net,0);
+      const our=Math.round(dist*share/100); const own=dist-our; const due=own-paid;
       const ow=(d.owners||[]).find(o=>o.id===p.ownerId);
-      const rec={name:p.name,owner:ow?ow.ownerName:"—",income,expense,net,our,own,share};
+      const rec={name:p.name,owner:ow?ow.ownerName:"—",income,expense,net,our,own,share,ownPct:100-share,paid,due,payouts:payoutList};
       perProp[p.name]=rec; list.push(rec);
-      tIncome+=income; tExpense+=expense; tNet+=net; tOur+=our; tOwner+=own;
+      tIncome+=income; tExpense+=expense; tNet+=net; tOur+=our; tOwner+=own; tPaid+=paid; tDue+=due;
     });
-    return {perProp,list,totals:{income:tIncome,expense:tExpense,net:tNet,our:tOur,owner:tOwner}};
+    return {perProp,list,totals:{income:tIncome,expense:tExpense,net:tNet,our:tOur,owner:tOwner,paid:tPaid,due:tDue}};
   }
   copyOwnerLogin(o){ return ()=>{ const t="Crownline Owner Portal login\nName: "+(o.ownerName||"")+"\nEmail: "+(o.email||"")+"\n\nOpen the dashboard, click 'Owner Login', and sign in with your email and the password you were given when your account was created."; try{ navigator.clipboard.writeText(t); this.flash("Login details copied."); }catch(e){ this.flash("Copy not available."); } }; }
   openOwnerLogin(){ this.setState({ownerLoginOpen:true,ownerLoginEmail:"",ownerLoginPass:"",ownerLoginErr:""}); }
@@ -1981,7 +2041,7 @@ class Component extends DCLogic {
   assocAllowed(a){ const sec=["Dashboard","Properties","Booking","Calendar","Expenses","Analytics","Documents","Housekeeping","Automation","AI Assistant"]; const acc=(a&&a.access)||{}; return sec.filter(s=>acc[s]!==false); }
   copyAssociateLogin(a){ return ()=>{ const t="Crownline Associate login\nName: "+(a.name||"")+"\nEmail: "+(a.email||"")+"\n\nOpen the dashboard, go to Associates → Associate login, and sign in with your email and the password you were given when your account was created."; try{ navigator.clipboard.writeText(t); this.flash("Login details copied."); }catch(e){ this.flash("Copy not available."); } }; }
   shiftOwnerMonth(n){ this.setState(s=>{ let M=(s.ownerCalMonth!=null?s.ownerCalMonth:7)+n, Y=s.ownerCalYear!=null?s.ownerCalYear:2026; if(M<0){M=11;Y--;} if(M>11){M=0;Y++;} return {ownerCalMonth:M,ownerCalYear:Y}; }); }
-  exportOwnerExcel(o,props,bookings,expenses,period){
+  exportOwnerExcel(o,props,bookings,expenses,period,FP,payouts){
     const esc=(v)=>String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     const th=(a)=>"<tr>"+a.map(x=>"<th style='background:#7a2233;color:#fff;text-align:left;padding:4px 8px'>"+esc(x)+"</th>").join("")+"</tr>";
     const tr=(a)=>"<tr>"+a.map(x=>"<td style='padding:4px 8px;border:1px solid #ccc'>"+esc(x)+"</td>").join("")+"</tr>";
@@ -1990,7 +2050,15 @@ class Component extends DCLogic {
     let html="<html><head><meta charset='utf-8'></head><body>";
     html+="<h2>The Crownline Residences — Owner Statement</h2>";
     html+="<p>Owner: "+esc(o.ownerName||"")+" &nbsp; | &nbsp; Period: "+esc(period)+"</p>";
-    html+="<h3>Summary</h3><table>"+th(["Metric","Value (INR)"])+tr(["Properties",props.length])+tr(["Bookings",bookings.length])+tr(["Gross Revenue",income])+tr(["Expenses",expTot])+tr(["Net Profit",income-expTot])+"</table><br>";
+    html+="<h3>Summary</h3><table>"+th(["Metric","Value (INR)"])+tr(["Properties",props.length])+tr(["Bookings",bookings.length])+tr(["Gross Revenue",income])+tr(["Expenses",expTot])+tr(["Net Profit",income-expTot])+(FP?tr(["Your share",FP.totals.owner])+tr(["Paid to you",FP.totals.paid])+tr(["Balance due",FP.totals.due]):"")+"</table><br>";
+    if(FP){
+      html+="<h3>Settlement</h3><table>"+th(["Property","Income","Expenses","Net profit","Crownline %","Crownline share","Owner %","Owner share","Paid to owner","Balance due"]);
+      FP.list.forEach(f=>{ html+=tr([f.name,f.income,f.expense,f.net,f.share+"%",f.our,f.ownPct+"%",f.own,f.paid,f.due]); });
+      const T=FP.totals; html+=tr(["TOTAL",T.income,T.expense,T.net,"",T.our,"",T.owner,T.paid,T.due])+"</table><br>";
+      html+="<h3>Payouts to owner</h3><table>"+th(["Date","Property","Note","Amount"]);
+      (payouts||[]).forEach(x=>{ html+=tr([x.date,x.prop,x.note||"",x.amt]); });
+      html+="</table><br>";
+    }
     html+="<h3>Bookings</h3><table>"+th(["Guest","Property","Source","Check-in","Check-out","Amount"]);
     bookings.forEach(b=>{ html+=tr([b.guest,b.prop,b.plat,b.checkin,b.checkout,b.amt]); });
     html+="</table><br>";
@@ -2603,8 +2671,10 @@ class Component extends DCLogic {
       const inPeriod=(ds)=>{ if(period==="All time") return true; const dt=new Date(ds); return !isNaN(dt)&&(monthName[dt.getMonth()]+" "+dt.getFullYear())===period; };
       const myBookings=myBookingsAll.filter(b=>inPeriod(b.checkin));
       const myExpenses=myExpensesAll.filter(x=>inPeriod(x.date));
+      const FP=this.ownerFinancials(inPeriod, myProps.map(p=>p.name));
+      const myPayouts=(d.payouts||[]).filter(x=>mySet[x.prop]&&inPeriod(x.date)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
       const canBookings=acc["Bookings"]!==false, canEarn=acc["Earnings & Profit"]!==false, canExp=acc["Expenses"]!==false, canCal=acc["Calendar"]!==false, canDoc=acc["Documents"]!==false;
-      base.ownerExport=()=>this.exportOwnerExcel(o,myProps,myBookings,myExpenses,period);
+      base.ownerExport=()=>this.exportOwnerExcel(o,myProps,myBookings,myExpenses,period,FP,myPayouts);
 
       // tabs (only granted sections)
       const tabDefs=[{key:"Overview",on:true},{key:"Bookings",on:canBookings},{key:"Earnings & Profit",on:canEarn},{key:"Expenses",on:canExp},{key:"Calendar",on:canCal},{key:"Documents",on:canDoc}];
@@ -2622,7 +2692,7 @@ class Component extends DCLogic {
         {label:"Your Properties",value:String(myProps.length),sub:"managed by Crownline",color:"#7a2233"},
         {label:"Bookings",value:String(myBookings.length),sub:"total reservations",color:"#4FA478"},
         {label:"Revenue",value:canEarn?this.inr(income):"—",sub:canEarn?"gross bookings":"hidden",color:"#2b2320"},
-        {label:"Your Profit",value:canEarn?this.inr(myProps.reduce((a,p)=>a+((F.perProp[p.name]||{own:0}).own),0)):"—",sub:canEarn?"your share":"hidden",color:"#735451"},
+        {label:"Your Share",value:canEarn?this.inr(FP.totals.owner):"—",sub:canEarn?"profit due to you":"hidden",color:"#735451"},
       ];
       base.ownerPropCards=myProps.map(p=>{ const pb=myBookings.filter(b=>b.prop===p.name); return {name:p.name,building:p.building||"—",bookings:String(pb.length),revenue:this.inr(pb.reduce((a,b)=>a+(Number(b.amt)||0),0))}; });
 
@@ -2630,13 +2700,28 @@ class Component extends DCLogic {
       base.ownerSessionBookings=myBookings.map(b=>({guest:b.guest,prop:b.prop,source:b.plat,dates:this.fmtRange(b.checkin,b.checkout),amt:this.inr(b.amt)}));
 
       // earnings
+      const advance=FP.totals.due<0;
       base.ownerEarnKpis=[
-        {label:"Gross Revenue",value:this.inr(income),sub:"all bookings",color:"#4FA478"},
-        {label:"Expenses",value:this.inr(expTot),sub:"on your properties",color:"#C25B52"},
-        {label:"Net Profit",value:this.inr(income-expTot),sub:"revenue − expenses",color:"#2b2320"},
-        {label:"Your Share",value:this.inr(myProps.reduce((a,p)=>a+((F.perProp[p.name]||{own:0}).own),0)),sub:"after Crownline's cut",color:"#735451"},
+        {label:"Gross Revenue",value:this.inr(FP.totals.income),sub:"all bookings",color:"#4FA478"},
+        {label:"Expenses",value:this.inr(FP.totals.expense),sub:"on your properties",color:"#C25B52"},
+        {label:"Net Profit",value:this.inr(FP.totals.net),sub:"revenue − expenses",color:"#2b2320"},
+        {label:"Your Share",value:this.inr(FP.totals.owner),sub:"of net profit",color:"#735451"},
+        {label:"Paid to You",value:this.inr(FP.totals.paid),sub:"payouts received",color:"#4FA478"},
+        {label:advance?"Paid in Advance":"Balance Due to You",value:this.inr(Math.abs(FP.totals.due)),sub:advance?"paid more than share so far":"still to be paid",color:advance?"#C97B1E":"#7a2233"},
       ];
-      base.ownerEarnRows=myProps.map(p=>{ const f=F.perProp[p.name]||{net:0,our:0,own:0}; const tot=Math.abs(f.our)+Math.abs(f.own)||1; return {name:p.name,net:this.inr(f.net),our:this.inr(f.our),own:this.inr(f.own),ourPct:Math.round(Math.max(f.our,0)/tot*100),ownPct:Math.round(Math.max(f.own,0)/tot*100)}; });
+      base.ownerSettleRows=FP.list.map(f=>({
+        name:f.name, noProfit:f.net<=0,
+        lines:[
+          {label:"Booking income",value:this.inr(f.income),color:"#2b2320",bold:false},
+          {label:"Less: expenses",value:"− "+this.inr(f.expense),color:"#C25B52",bold:false},
+          {label:"Net profit",value:this.inr(f.net),color:"#2b2320",bold:true},
+          {label:"Crownline share ("+f.share+"%)",value:this.inr(f.our),color:"#7a2233",bold:false},
+          {label:"Your share ("+f.ownPct+"%)",value:this.inr(f.own),color:"#4FA478",bold:true},
+          {label:"Less: already paid to you",value:"− "+this.inr(f.paid),color:"#6b615a",bold:false},
+          {label:f.due<0?"Paid in advance":"Balance due to you",value:this.inr(Math.abs(f.due)),color:f.due<0?"#C97B1E":"#7a2233",bold:true},
+        ]}));
+      base.ownerNoPayouts=myPayouts.length===0;
+      base.ownerPayoutRows=myPayouts.map(x=>({date:x.date||"—",prop:x.prop,note:x.note||"Profit share payout",amt:this.inr(x.amt)}));
 
       // expenses
       base.ownerExpTotal=this.inr(expTot);
@@ -2689,6 +2774,30 @@ class Component extends DCLogic {
         base.ownerIncExpChart=this.ownerTripleBars(F.list.map(r=>({name:r.name.split(" ")[0],income:r.income,expense:r.expense,net:r.net})));
         base.ownerShareRows=F.list.map(r=>{ const tot=Math.abs(r.our)+Math.abs(r.own)||1; return {name:r.name,share:String(r.share),our:this.inr(r.our),own:this.inr(r.own),ourPct:Math.round(Math.max(r.our,0)/tot*100),ownPct:Math.round(Math.max(r.own,0)/tot*100)}; });
       }
+      // settlement per property + payout ledger
+      base.ownerSettleShow=F.list.length>0;
+      base.addOwnerPayout=()=>this.openAddFor("OwnerPayout");
+      const dueAll=F.totals.due<0;
+      base.ownerSettleKpis=[
+        {label:"Net profit (all owner units)",value:this.inr(F.totals.net),color:"#2b2320"},
+        {label:"Owners' share",value:this.inr(F.totals.owner),color:"#C9A24B"},
+        {label:"Paid to owners",value:this.inr(F.totals.paid),color:"#4FA478"},
+        {label:dueAll?"Paid in advance":"Balance still to pay",value:this.inr(Math.abs(F.totals.due)),color:dueAll?"#C97B1E":"#7a2233"},
+      ];
+      base.ownerSettleAdmin=F.list.map(f=>({
+        name:f.name, owner:f.owner, noProfit:f.net<=0,
+        lines:[
+          {label:"Booking income",value:this.inr(f.income),color:"#2b2320"},
+          {label:"Less: expenses",value:"− "+this.inr(f.expense),color:"#C25B52"},
+          {label:"Net profit",value:this.inr(f.net),color:"#2b2320"},
+          {label:"Our share ("+f.share+"%)",value:this.inr(f.our),color:"#7a2233"},
+          {label:"Owner share ("+f.ownPct+"%)",value:this.inr(f.own),color:"#C9A24B"},
+          {label:"Less: paid to owner",value:"− "+this.inr(f.paid),color:"#6b615a"},
+          {label:f.due<0?"Paid in advance":"Balance to pay owner",value:this.inr(Math.abs(f.due)),color:f.due<0?"#C97B1E":"#7a2233"},
+        ]}));
+      const allPayouts=(d.payouts||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+      base.ownerPayoutAdminEmpty=allPayouts.length===0;
+      base.ownerPayoutAdminRows=allPayouts.map(x=>({date:x.date||"—",prop:x.prop,note:x.note||"—",amt:this.inr(x.amt),edit:this.openEdit("OwnerPayout",x.id),remove:this.removeRec("OwnerPayout",x.id)}));
       base.ownerKpis=[
         {label:"Owners",value:String(owners.length),sub:"with portal access",color:"#7a2233"},
         {label:"Owner Properties",value:String(ownedCount),sub:"tagged (Owners)",color:"#2b2320"},
